@@ -87,7 +87,7 @@
 #include "WICTextureLoader.h"
 
 // custom
-// #include <spdlog/spdlog.h>
+#include <spdlog/spdlog.h>
 #include <iostream>
 
 // To use graphics and CPU markup events with the latest version of PIX, change this to include <pix3.h>

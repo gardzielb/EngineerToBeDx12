@@ -352,3 +352,7 @@ MigrationBackup/
 # my own build target config
 bin/
 bin-int/
+
+# Conan stuff
+conanbuildinfo.*
+conaninfo.txt
