@@ -58,7 +58,7 @@ private:
 
 	// IMGUI
 	// -----------------------------------------------
-	void PrepareImguiFrame();
+	// void PrepareImguiFrame();
 	// -----------------------------------------------
 
 	// Device resources.
@@ -70,26 +70,28 @@ private:
 	// DX TK
 	std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;
 
-	using Vertex = DirectX::VertexPositionTexture;
+	using Vertex = DirectX::VertexPositionNormalTexture;
 
-	std::unique_ptr<DirectX::BasicEffect> m_effect;
+	std::unique_ptr<DirectX::NormalMapEffect> m_effect;
 	std::unique_ptr<DirectX::PrimitiveBatch<Vertex>> m_primitiveBatch;
 
 	std::unique_ptr<DirectX::CommonStates> m_states;
 
 	std::unique_ptr<DirectX::DescriptorHeap> m_resourceDescHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_texture;
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_normalMap;
 
 	enum ResourceDescriptors
 	{
 		Rocks,
+		NormalMap,
 		Count
 	};
 
 	// IMGUI
 	// -----------------------------------------------
-	bool m_showDemoWindow = true;
-	bool m_showAnotherWindow = false;
-	ImVec4 m_clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	// bool m_showDemoWindow = true;
+	// bool m_showAnotherWindow = false;
+	// ImVec4 m_clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	// -----------------------------------------------
 };

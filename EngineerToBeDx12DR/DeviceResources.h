@@ -72,10 +72,10 @@ namespace DX
 
         // IMGUI
 		// -----------------------------------
-        Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSrvDescriptorHeap() const
-        {
-	        return m_srvDescriptorHeap;
-        };
+        // Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSrvDescriptorHeap() const
+        // {
+	        // return m_srvDescriptorHeap;
+        // };
         // -----------------------------------
 
         CD3DX12_CPU_DESCRIPTOR_HANDLE GetRenderTargetView() const noexcept
@@ -145,7 +145,7 @@ namespace DX
 
         // IMGUI
         // -----------------------------------
-        Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>        m_srvDescriptorHeap;
+        // Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>        m_srvDescriptorHeap;
         // -----------------------------------
     };
 }
