@@ -28,6 +28,8 @@
 // WinHelp is deprecated
 #define NOHELP
 
+#define USING_D3D12_AGILITY_SDK
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
