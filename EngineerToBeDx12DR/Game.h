@@ -70,10 +70,10 @@ private:
 	// DX TK
 	std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;
 
-	using Vertex = DirectX::VertexPositionNormalTexture;
+	// using TriangleVertex = DirectX::VertexPositionNormalTexture;
 
-	std::unique_ptr<DirectX::NormalMapEffect> m_effect;
-	std::unique_ptr<DirectX::PrimitiveBatch<Vertex>> m_primitiveBatch;
+	// std::unique_ptr<DirectX::NormalMapEffect> m_triangleEffect;
+	// std::unique_ptr<DirectX::PrimitiveBatch<TriangleVertex>> m_triangleBatch;
 
 	std::unique_ptr<DirectX::CommonStates> m_states;
 
@@ -87,6 +87,19 @@ private:
 		NormalMap,
 		Count
 	};
+
+	using GridVertex = DirectX::VertexPositionColor;
+	
+	std::unique_ptr<DirectX::BasicEffect> m_gridEffect;
+	std::unique_ptr<DirectX::PrimitiveBatch<GridVertex>> m_gridBatch;
+	DirectX::SimpleMath::Matrix m_gridModelMatrix;
+
+	DirectX::SimpleMath::Matrix m_shapeModelMatrix;
+	std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
+	std::unique_ptr<DirectX::NormalMapEffect> m_shapeEffect;
+
+	DirectX::SimpleMath::Matrix m_viewMatrix;
+	DirectX::SimpleMath::Matrix m_projMatrix;
 
 	// IMGUI
 	// -----------------------------------------------
