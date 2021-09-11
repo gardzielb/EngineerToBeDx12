@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "Game.h"
+#include "backends/imgui_impl_win32.h"
 
 using namespace DirectX;
 
@@ -57,6 +58,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     g_game = std::make_unique<Game>();
 
     // Register class and create window
+    ImGui_ImplWin32_EnableDpiAwareness();
     {
         // Register class
         WNDCLASSEXW wcex = {};
@@ -123,6 +125,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     return static_cast<int>(msg.wParam);
 }
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 // Windows procedure
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -131,6 +135,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static bool s_minimized = false;
     static bool s_fullscreen = false;
     // TODO: Set s_fullscreen to true if defaulting to fullscreen.
+    
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        return true;
 
     auto game = reinterpret_cast<Game*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
