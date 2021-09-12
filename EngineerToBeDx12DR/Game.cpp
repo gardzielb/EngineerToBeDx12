@@ -443,7 +443,7 @@ void Game::LoadTexture(ID3D12Device * device)
 
 	DX::ThrowIfFailed(
 		CreateWICTextureFromFile(
-			device, resourceUpload, L"rocks.jpg", m_texture.ReleaseAndGetAddressOf()
+			device, resourceUpload, L"kiti.jpg", m_texture.ReleaseAndGetAddressOf()
 		)
 	);
 
