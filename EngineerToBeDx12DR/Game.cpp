@@ -81,7 +81,7 @@ void Game::Initialize(HWND window, int width, int height)
 	ImGui_ImplWin32_Init(window);
 	ImGui_ImplDX12_Init(
 		m_deviceResources->GetD3DDevice(), m_deviceResources->GetBackBufferCount(),
-		DXGI_FORMAT_R8G8B8A8_UNORM, srvDescHeap.Get(),
+		m_deviceResources->GetBackBufferFormat(), srvDescHeap.Get(),
 		srvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescHeap->GetGPUDescriptorHandleForHeapStart()
 	);
@@ -153,9 +153,9 @@ void Game::Render()
 	m_effect->Apply(commandList);
 	m_primitiveBatch->Begin(commandList);
 
-	Vertex v1(dxmath::Vector3(0.0f, 0.5f, 0.5f), dxmath::Vector2(0.5f, 0));
-	Vertex v2(dxmath::Vector3(0.5f, -0.5f, 0.5f), dxmath::Vector2(1, 1));
-	Vertex v3(dxmath::Vector3(-0.5f, -0.5f, 0.5f), dxmath::Vector2(0, 1));
+	Vertex v1(dxmath::Vector3(400.f, 150.f, 0.f), dxmath::Vector2(0.5f, 0));
+	Vertex v2(dxmath::Vector3(600.f, 450.f, 0.f), dxmath::Vector2(1, 1));
+	Vertex v3(dxmath::Vector3(200.f, 450.f, 0.f), dxmath::Vector2(0, 1));
 
 	m_primitiveBatch->DrawTriangle(v1, v2, v3);
 	m_primitiveBatch->End();
@@ -261,18 +261,19 @@ void Game::CreateDeviceDependentResources()
 
 	m_graphicsMemory = std::make_unique<GraphicsMemory>(device);
 
-	LoadTexture(device);
-
 	m_primitiveBatch = std::make_unique<PrimitiveBatch<Vertex>>(device);
 
 	RenderTargetState renderTargetState(
-		DXGI_FORMAT_B8G8R8A8_UNORM, DXGI_FORMAT_D32_FLOAT
+		m_deviceResources->GetBackBufferFormat(),
+		m_deviceResources->GetDepthBufferFormat()
 	);
 
 	EffectPipelineStateDescription pipelineDesc(
 		&Vertex::InputLayout, CommonStates::Opaque, CommonStates::DepthDefault,
 		CommonStates::CullCounterClockwise, renderTargetState
 	);
+
+	LoadTexture(device);
 
 	// according to the tutorial this line is not here,
 	// but the tutorial is obviously wrong
@@ -299,9 +300,13 @@ void Game::CreateDeviceDependentResources()
 // Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateWindowSizeDependentResources()
 {
-	// TODO: Initialize windows-size dependent objects here.
+	// TODO: Initialize windows-size dependent objects here.		
+	auto size = m_deviceResources->GetOutputSize();
 
-	// m_states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
+	dxmath::Matrix proj = dxmath::Matrix::CreateScale(2.f / float(size.right),
+		-2.f / float(size.bottom), 1.f)
+		* dxmath::Matrix::CreateTranslation(-1.f, 1.f, 0.f);
+	m_effect->SetProjection(proj);
 }
 
 void Game::LoadTexture(ID3D12Device * device)
