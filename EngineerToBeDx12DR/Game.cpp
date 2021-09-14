@@ -124,7 +124,7 @@ void Game::Update(DX::StepTimer const & timer)
 	float pitch = time * 0.7f;
 	float roll = time * 1.1f;
 
-	// TODO: seems some interesting fucking magic
+	// TODO: seems to be an interesting fucking magic
 	auto quaternion = DXMath::Quaternion::CreateFromYawPitchRoll(pitch, yaw, roll);
 	auto light = XMVector3Rotate(g_XMOne, quaternion);
 	m_shapeEffect->SetLightDirection(0, light);
@@ -395,7 +395,12 @@ void Game::CreateDeviceDependentResources()
 		CommonStates::CullClockwise, renderTargetState
 	);
 
-	m_cupModelEffects = m_cupModel->CreateEffects(*m_effectFactory, cupPipelineDesc, cupPipelineDesc);
+	EffectPipelineStateDescription cupAlphaPipelineDesc(
+		nullptr, CommonStates::NonPremultiplied, CommonStates::DepthDefault,
+		CommonStates::CullClockwise, renderTargetState
+	);
+
+	m_cupModelEffects = m_cupModel->CreateEffects(*m_effectFactory, cupPipelineDesc, cupAlphaPipelineDesc);
 	m_cupModelMatrix = DXMath::Matrix::Identity;
 
 	// TRIANGLE
@@ -495,6 +500,8 @@ void Game::LoadModel(ID3D12Device * device)
 {
 	ResourceUploadBatch resourceUpload(device);
 	resourceUpload.Begin();
+
+	m_cupModel->LoadStaticBuffers(device, resourceUpload);
 
 	m_cupModelResources = m_cupModel->LoadTextures(device, resourceUpload);
 	m_effectFactory = std::make_unique<EffectFactory>(m_cupModelResources->Heap(), m_states->Heap());
