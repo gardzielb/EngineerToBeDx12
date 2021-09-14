@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <imgui.h>
-
+#include "DemoImguiLayer.h"
 #include "DeviceResources.h"
 #include "StepTimer.h"
 
@@ -57,11 +56,6 @@ private:
 	void LoadTexture(ID3D12Device* device);
 	void LoadModel(ID3D12Device * device);
 
-	// IMGUI
-	// -----------------------------------------------
-	// void PrepareImguiFrame();
-	// -----------------------------------------------
-
 	// Device resources.
 	std::unique_ptr<DX::DeviceResources> m_deviceResources;
 
@@ -108,10 +102,5 @@ private:
 	DirectX::SimpleMath::Matrix m_viewMatrix;
 	DirectX::SimpleMath::Matrix m_projMatrix;
 
-	// IMGUI
-	// -----------------------------------------------
-	// bool m_showDemoWindow = true;
-	// bool m_showAnotherWindow = false;
-	// ImVec4 m_clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	// -----------------------------------------------
+	DemoImguiLayer m_imguiLayer;
 };

@@ -5,8 +5,6 @@
 #include "pch.h"
 #include "DeviceResources.h"
 
-#include <imgui.h>
-
 using namespace DirectX;
 using namespace DX;
 
@@ -228,15 +226,6 @@ void DeviceResources::CreateDeviceResources()
 
         m_dsvDescriptorHeap->SetName(L"DeviceResources");
     }
-
-    // IMGUI
-	// ------------------------------------------
-    // D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-    // desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    // desc.NumDescriptors = 1;
-    // desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    // ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(m_srvDescriptorHeap.ReleaseAndGetAddressOf())));
-    // ------------------------------------------
 
     // Create a command allocator for each back buffer that will be rendered to.
     for (UINT n = 0; n < m_backBufferCount; n++)
@@ -488,11 +477,6 @@ void DeviceResources::HandleDeviceLost()
     m_rtvDescriptorHeap.Reset();
     m_dsvDescriptorHeap.Reset();
 
-	// IMGUI
-	// ----------------------
-    // m_srvDescriptorHeap.Reset();
-	// ----------------------
-
     m_swapChain.Reset();
     m_d3dDevice.Reset();
     m_dxgiFactory.Reset();
@@ -545,16 +529,6 @@ void DeviceResources::Present(D3D12_RESOURCE_STATES beforeState)
     // Send the command list off to the GPU for processing.
     ThrowIfFailed(m_commandList->Close());
     m_commandQueue->ExecuteCommandLists(1, CommandListCast(m_commandList.GetAddressOf()));
-
-    // IMGUI
-	// --------------------------------------------
-	// Update and Render additional Platform Windows
-	// if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	// {
-    // ImGui::UpdatePlatformWindows();
-    // ImGui::RenderPlatformWindowsDefault(nullptr, (void*)m_commandList.Get());
-    // }
-    // --------------------------------------------
 	
     HRESULT hr;
     if (m_options & c_AllowTearing)

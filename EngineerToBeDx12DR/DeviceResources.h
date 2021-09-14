@@ -70,14 +70,6 @@ namespace DX
         DXGI_COLOR_SPACE_TYPE       GetColorSpace() const noexcept         { return m_colorSpace; }
         unsigned int                GetDeviceOptions() const noexcept      { return m_options; }
 
-        // IMGUI
-		// -----------------------------------
-        // Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSrvDescriptorHeap() const
-        // {
-	        // return m_srvDescriptorHeap;
-        // };
-        // -----------------------------------
-
         CD3DX12_CPU_DESCRIPTOR_HANDLE GetRenderTargetView() const noexcept
         {
             return CD3DX12_CPU_DESCRIPTOR_HANDLE(
@@ -142,10 +134,5 @@ namespace DX
 
         // The IDeviceNotify can be held directly as it owns the DeviceResources.
         IDeviceNotify*                                      m_deviceNotify;
-
-        // IMGUI
-        // -----------------------------------
-        // Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>        m_srvDescriptorHeap;
-        // -----------------------------------
     };
 }
