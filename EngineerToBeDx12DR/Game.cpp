@@ -26,14 +26,6 @@ Game::Game() noexcept(false)
 
 Game::~Game()
 {
-	// IMGUI
-	// --------------------------
-	// Cleanup
-	// ImGui_ImplDX12_Shutdown();
-	// ImGui_ImplWin32_Shutdown();
-	// ImGui::DestroyContext();
-	// --------------------------
-
 	if (m_deviceResources)
 	{
 		m_deviceResources->WaitForGpu();
@@ -55,43 +47,6 @@ void Game::Initialize(HWND window, int width, int height)
 
 	m_deviceResources->CreateWindowSizeDependentResources();
 	CreateWindowSizeDependentResources();
-
-	// IMGUI
-	// -----------------------------------
-	// Setup Dear ImGui context
-	// IMGUI_CHECKVERSION();
-	// ImGui::CreateContext();
-	// ImGuiIO & io = ImGui::GetIO();
-	// (void)io;
-	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	// io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-	//io.ConfigViewportsNoAutoMerge = true;
-	//io.ConfigViewportsNoTaskBarIcon = true;
-
-	// Setup Dear ImGui style
-	// ImGui::StyleColorsDark();
-	//ImGui::StyleColorsClassic();
-
-	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-	// ImGuiStyle & style = ImGui::GetStyle();
-	// if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	// {
-	// style.WindowRounding = 0.0f;
-	// style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	// }
-
-	// Setup Platform/Renderer backends
-	// auto srvDescHeap = m_deviceResources->GetSrvDescriptorHeap();
-	// ImGui_ImplWin32_Init(window);
-	// ImGui_ImplDX12_Init(
-	// m_deviceResources->GetD3DDevice(), m_deviceResources->GetBackBufferCount(),
-	// m_deviceResources->GetBackBufferFormat(), srvDescHeap.Get(),
-	// srvDescHeap->GetCPUDescriptorHandleForHeapStart(),
-	// srvDescHeap->GetGPUDescriptorHandleForHeapStart()
-	// );
-	// -----------------------------------
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
@@ -139,11 +94,6 @@ void Game::Render()
 		return;
 	}
 
-	// IMGUI
-	// -----------------------------------
-	// PrepareImguiFrame();
-	// -----------------------------------
-
 	// Prepare the command list to render a new frame.
 	m_deviceResources->Prepare();
 	Clear();
@@ -165,13 +115,6 @@ void Game::Render()
 
 	m_primitiveBatch->DrawTriangle(v1, v2, v3);
 	m_primitiveBatch->End();
-
-	// IMGUI
-	// -----------------------------------
-	// Render Dear ImGui graphics
-	// commandList->SetDescriptorHeaps(1, m_deviceResources->GetSrvDescriptorHeap().GetAddressOf());
-	// ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
-	// -----------------------------------
 
 	m_imguiLayer.OnRender(commandList);
 
@@ -365,60 +308,3 @@ void Game::OnDeviceRestored()
 	CreateWindowSizeDependentResources();
 }
 #pragma endregion
-
-
-// IMGUI
-// -----------------------
-// void Game::PrepareImguiFrame()
-// {
-// 	// Start the Dear ImGui frame
-// 	ImGui_ImplDX12_NewFrame();
-// 	ImGui_ImplWin32_NewFrame();
-// 	ImGui::NewFrame();
-//
-// 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-// 	if (m_showDemoWindow)
-// 		ImGui::ShowDemoWindow(&m_showDemoWindow);
-//
-// 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-// 	{
-// 		static float f = 0.0f;
-// 		static int counter = 0;
-//
-// 		ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-//
-// 		ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-// 		ImGui::Checkbox("Demo Window", &m_showDemoWindow); // Edit bools storing our window open/close state
-// 		ImGui::Checkbox("Another Window", &m_showAnotherWindow);
-//
-// 		ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-// 		ImGui::ColorEdit3("clear color", (float*)&m_clearColor); // Edit 3 floats representing a color
-//
-// 		if (ImGui::Button("Button"))
-// 			// Buttons return true when clicked (most widgets return true when edited/activated)
-// 			counter++;
-// 		ImGui::SameLine();
-// 		ImGui::Text("counter = %d", counter);
-//
-// 		ImGui::Text(
-// 			"Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate
-// 		);
-// 		ImGui::End();
-// 	}
-//
-// 	// 3. Show another simple window.
-// 	if (m_showAnotherWindow)
-// 	{
-// 		ImGui::Begin("Another Window", &m_showAnotherWindow);
-// 		// Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-// 		ImGui::Text("Hello from another window!");
-// 		if (ImGui::Button("Close Me"))
-// 			m_showAnotherWindow = false;
-// 		ImGui::End();
-// 	}
-//
-// 	// Rendering
-// 	ImGui::Render();
-// }
-
-// -----------------------

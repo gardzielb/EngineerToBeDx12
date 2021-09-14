@@ -33,7 +33,7 @@ void ImguiLayerBase::OnDeviceLost()
 	m_srvDescriptorHeap.Reset();
 }
 
-void ImguiLayerBase::OnPresent(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList)
+void ImguiLayerBase::OnPresent(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList) const
 {
 	// Update and Render additional Platform Windows
 	if (m_io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -57,9 +57,8 @@ void ImguiLayerBase::OnDeviceCreated(HWND window, ID3D12Device * device, int bac
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	m_io = &ImGui::GetIO();
-	// (void)m_io;
 	m_io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-	//m_io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	//m_io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 	m_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
 	m_io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 	//io.ConfigViewportsNoAutoMerge = true;

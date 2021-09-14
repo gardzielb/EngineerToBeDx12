@@ -12,9 +12,10 @@ public:
 
 	void OnDeviceLost();
 
-	void OnPresent(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList);
+	void OnPresent(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList) const;
 
 protected:
+	// override this method to create UI
 	virtual void CreateGUI() = 0;
 
 	virtual ~ImguiLayerBase();
