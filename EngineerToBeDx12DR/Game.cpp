@@ -135,6 +135,9 @@ void Game::Update(DX::StepTimer const & timer)
 
 	m_shapeModelMatrix = DXMath::Matrix::CreateRotationY(-cosf(time));
 
+	// m_cupModelMatrix = DXMath::Matrix::CreateRotationZ(cosf(time) * 2.f);
+	m_cupModelMatrix = DXMath::Matrix::CreateTranslation(-1.f, 0.f, 0.f);
+
 	PIXEndEvent();
 }
 #pragma endregion
@@ -195,6 +198,15 @@ void Game::Render()
 	// m_triangleBatch->DrawTriangle(v1, v2, v3);
 	// m_triangleBatch->End();
 	// }
+
+	// RENDER CUP MODEL
+	{
+		ID3D12DescriptorHeap * heaps[] = {m_cupModelResources->Heap(), m_states->Heap()};
+		commandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
+
+		Model::UpdateEffectMatrices(m_cupModelEffects, m_cupModelMatrix, m_viewMatrix, m_projMatrix);
+		m_cupModel->Draw(commandList, m_cupModelEffects.cbegin());
+	}
 
 	// RENDER GRID
 	{
@@ -373,6 +385,19 @@ void Game::CreateDeviceDependentResources()
 	m_shape = GeometricPrimitive::CreateTeapot();
 	m_shapeModelMatrix = DXMath::Matrix::Identity;
 
+	// CUP MODEL
+
+	m_cupModel = Model::CreateFromSDKMESH(device, L"cup.sdkmesh");
+	LoadModel(device);
+
+	EffectPipelineStateDescription cupPipelineDesc(
+		nullptr, CommonStates::Opaque, CommonStates::DepthDefault,
+		CommonStates::CullClockwise, renderTargetState
+	);
+
+	m_cupModelEffects = m_cupModel->CreateEffects(*m_effectFactory, cupPipelineDesc, cupPipelineDesc);
+	m_cupModelMatrix = DXMath::Matrix::Identity;
+
 	// TRIANGLE
 
 	// LoadTexture(device);
@@ -466,6 +491,18 @@ void Game::LoadTexture(ID3D12Device * device)
 	uploadResourceTask.wait();
 }
 
+void Game::LoadModel(ID3D12Device * device)
+{
+	ResourceUploadBatch resourceUpload(device);
+	resourceUpload.Begin();
+
+	m_cupModelResources = m_cupModel->LoadTextures(device, resourceUpload);
+	m_effectFactory = std::make_unique<EffectFactory>(m_cupModelResources->Heap(), m_states->Heap());
+
+	auto uploadFinished = resourceUpload.End(m_deviceResources->GetCommandQueue());
+	uploadFinished.wait();
+}
+
 void Game::OnDeviceLost()
 {
 	// TODO: Add Direct3D resource cleanup here.
@@ -483,6 +520,12 @@ void Game::OnDeviceLost()
 
 	m_shapeEffect.reset();
 	m_shape.reset();
+
+	m_states.reset();
+	m_effectFactory.reset();
+	m_cupModelResources.reset();
+	m_cupModel.reset();
+	m_cupModelEffects.clear();
 }
 
 void Game::OnDeviceRestored()

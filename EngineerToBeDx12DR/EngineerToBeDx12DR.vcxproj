@@ -228,6 +228,7 @@
     <Manifest Include="settings.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cup.sdkmesh" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

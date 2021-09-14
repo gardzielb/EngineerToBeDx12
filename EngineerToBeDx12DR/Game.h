@@ -55,6 +55,7 @@ private:
 	void CreateWindowSizeDependentResources();
 
 	void LoadTexture(ID3D12Device* device);
+	void LoadModel(ID3D12Device * device);
 
 	// IMGUI
 	// -----------------------------------------------
@@ -97,6 +98,12 @@ private:
 	DirectX::SimpleMath::Matrix m_shapeModelMatrix;
 	std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
 	std::unique_ptr<DirectX::NormalMapEffect> m_shapeEffect;
+
+	DirectX::SimpleMath::Matrix m_cupModelMatrix;
+	std::unique_ptr<DirectX::EffectFactory> m_effectFactory;
+	std::unique_ptr<DirectX::Model> m_cupModel;
+	std::unique_ptr<DirectX::EffectTextureFactory> m_cupModelResources;
+	std::vector<std::shared_ptr<DirectX::IEffect>> m_cupModelEffects;
 
 	DirectX::SimpleMath::Matrix m_viewMatrix;
 	DirectX::SimpleMath::Matrix m_projMatrix;
