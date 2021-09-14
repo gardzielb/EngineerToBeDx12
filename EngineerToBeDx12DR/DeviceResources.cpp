@@ -5,7 +5,7 @@
 #include "pch.h"
 #include "DeviceResources.h"
 
-#include <imgui.h>
+// #include <imgui.h>
 
 using namespace DirectX;
 using namespace DX;
@@ -231,11 +231,11 @@ void DeviceResources::CreateDeviceResources()
 
     // IMGUI
 	// ------------------------------------------
-    D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-    desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    desc.NumDescriptors = 1;
-    desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(m_srvDescriptorHeap.ReleaseAndGetAddressOf())));
+    // D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+    // desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    // desc.NumDescriptors = 1;
+    // desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    // ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(m_srvDescriptorHeap.ReleaseAndGetAddressOf())));
     // ------------------------------------------
 
     // Create a command allocator for each back buffer that will be rendered to.
@@ -490,7 +490,7 @@ void DeviceResources::HandleDeviceLost()
 
 	// IMGUI
 	// ----------------------
-    m_srvDescriptorHeap.Reset();
+    // m_srvDescriptorHeap.Reset();
 	// ----------------------
 
     m_swapChain.Reset();
@@ -551,8 +551,8 @@ void DeviceResources::Present(D3D12_RESOURCE_STATES beforeState)
 	// Update and Render additional Platform Windows
 	// if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	// {
-    ImGui::UpdatePlatformWindows();
-    ImGui::RenderPlatformWindowsDefault(nullptr, (void*)m_commandList.Get());
+    // ImGui::UpdatePlatformWindows();
+    // ImGui::RenderPlatformWindowsDefault(nullptr, (void*)m_commandList.Get());
     // }
     // --------------------------------------------
 	

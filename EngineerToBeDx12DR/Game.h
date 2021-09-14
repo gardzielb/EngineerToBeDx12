@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <imgui.h>
+#include "DemoImguiLayer.h"
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
@@ -58,7 +58,7 @@ private:
 
 	// IMGUI
 	// -----------------------------------------------
-	void PrepareImguiFrame();
+	// void PrepareImguiFrame();
 	// -----------------------------------------------
 
 	// Device resources.
@@ -86,10 +86,12 @@ private:
 		Count
 	};
 
+	DemoImguiLayer m_imguiLayer;
+
 	// IMGUI
 	// -----------------------------------------------
-	bool m_showDemoWindow = true;
-	bool m_showAnotherWindow = false;
-	ImVec4 m_clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	// bool m_showDemoWindow = true;
+	// bool m_showAnotherWindow = false;
+	// ImVec4 m_clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	// -----------------------------------------------
 };
