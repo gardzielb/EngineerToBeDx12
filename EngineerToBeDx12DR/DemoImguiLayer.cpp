@@ -5,8 +5,7 @@
 
 
 DemoImguiLayer::DemoImguiLayer(bool showDemoWindow, bool showAnotherWindow, ImVec4 clearColor)
-	: ImguiLayerBase(),
-	  m_showDemoWindow(showDemoWindow), m_showAnotherWindow(showAnotherWindow), m_clearColor(clearColor) {}
+	: m_showDemoWindow(showDemoWindow), m_showAnotherWindow(showAnotherWindow), m_clearColor(clearColor) {}
 
 void DemoImguiLayer::CreateGUI()
 {

@@ -4,11 +4,11 @@
 class ImguiLayerBase
 {
 public:
-	ImguiLayerBase() = default;
-	
-	void OnDeviceCreated(HWND window, ID3D12Device* device, int backBufferCount, DXGI_FORMAT rtvFormat);
+	ImguiLayerBase();
 
-	void OnRender(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
+	void OnDeviceCreated(HWND window, ID3D12Device * device, int backBufferCount, DXGI_FORMAT rtvFormat);
+
+	void OnRender(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList);
 
 	void OnDeviceLost();
 
@@ -21,9 +21,6 @@ protected:
 	virtual ~ImguiLayerBase();
 
 private:
-	void Shutdown();
-
-	// members
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_srvDescriptorHeap;
 	ImGuiIO * m_io;
 };
