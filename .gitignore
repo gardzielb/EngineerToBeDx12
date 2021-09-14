@@ -352,3 +352,6 @@ MigrationBackup/
 # my own build target config
 bin/
 bin-int/
+
+# ImGui
+imgui.ini
