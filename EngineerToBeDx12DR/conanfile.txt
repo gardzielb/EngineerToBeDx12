@@ -1,0 +1,6 @@
+[requires]
+spdlog/1.9.2
+simdjson/0.9.7
+
+[generators]
+visual_studio

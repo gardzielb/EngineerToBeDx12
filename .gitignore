@@ -355,3 +355,7 @@ bin-int/
 
 # ImGui
 imgui.ini
+
+# Conan stuff
+conanbuildinfo.*
+conaninfo.txt

@@ -28,6 +28,8 @@
 // WinHelp is deprecated
 #define NOHELP
 
+#define USING_D3D12_AGILITY_SDK
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
@@ -87,7 +89,7 @@
 #include "WICTextureLoader.h"
 
 // custom
-// #include <spdlog/spdlog.h>
+#include <spdlog/spdlog.h>
 #include <iostream>
 
 // To use graphics and CPU markup events with the latest version of PIX, change this to include <pix3.h>
