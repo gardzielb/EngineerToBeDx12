@@ -5,6 +5,8 @@
 #include "pch.h"
 #include "Game.h"
 
+#include "Log.h"
+
 // #include "imgui.h"
 // #include "backends/imgui_impl_win32.h"
 // #include "backends/imgui_impl_dx12.h"
@@ -35,6 +37,8 @@ Game::~Game()
 // Initialize the Direct3D resources required to run.
 void Game::Initialize(HWND window, int width, int height)
 {
+	HUDSON_LOG_INFO("Initializing Hudson");
+	
 	m_deviceResources->SetWindow(window, width, height);
 
 	m_deviceResources->CreateDeviceResources();

@@ -23,6 +23,7 @@
     </ClInclude>
     <ClInclude Include="ImguiLayerBase.h" />
     <ClInclude Include="DemoImguiLayer.h" />
+    <ClInclude Include="Log.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -33,6 +34,7 @@
     </ClCompile>
     <ClCompile Include="ImguiLayerBase.cpp" />
     <ClCompile Include="DemoImguiLayer.cpp" />
+    <ClCompile Include="Log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
