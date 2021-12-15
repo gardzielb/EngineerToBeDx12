@@ -65,42 +65,27 @@ private:
 	// DX TK
 	std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;
 
-	// using TriangleVertex = DirectX::VertexPositionNormalTexture;
-
-	// std::unique_ptr<DirectX::NormalMapEffect> m_triangleEffect;
-	// std::unique_ptr<DirectX::PrimitiveBatch<TriangleVertex>> m_triangleBatch;
+	DirectX::SimpleMath::Matrix m_world;
+	DirectX::SimpleMath::Matrix m_view;
+	DirectX::SimpleMath::Matrix m_projection;
 
 	std::unique_ptr<DirectX::CommonStates> m_states;
+	std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
+	std::unique_ptr<DirectX::BasicEffect> m_effect;
+	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 
-	std::unique_ptr<DirectX::DescriptorHeap> m_resourceDescHeap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_texture;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_normalMap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_background;
 
-	enum ResourceDescriptors
+	std::unique_ptr<DirectX::DescriptorHeap> m_resourceDescriptors;
+
+	enum Descriptors
 	{
-		Rocks,
-		NormalMap,
+		SceneTex,
+		Background,
+		BlurTex1,
+		BlurTex2,
 		Count
 	};
 
-	using GridVertex = DirectX::VertexPositionColor;
-	
-	std::unique_ptr<DirectX::BasicEffect> m_gridEffect;
-	std::unique_ptr<DirectX::PrimitiveBatch<GridVertex>> m_gridBatch;
-	DirectX::SimpleMath::Matrix m_gridModelMatrix;
-
-	DirectX::SimpleMath::Matrix m_shapeModelMatrix;
-	std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
-	std::unique_ptr<DirectX::NormalMapEffect> m_shapeEffect;
-
-	DirectX::SimpleMath::Matrix m_cupModelMatrix;
-	std::unique_ptr<DirectX::EffectFactory> m_effectFactory;
-	std::unique_ptr<DirectX::Model> m_cupModel;
-	std::unique_ptr<DirectX::EffectTextureFactory> m_cupModelResources;
-	std::vector<std::shared_ptr<DirectX::IEffect>> m_cupModelEffects;
-
-	DirectX::SimpleMath::Matrix m_viewMatrix;
-	DirectX::SimpleMath::Matrix m_projMatrix;
-
-	DemoImguiLayer m_imguiLayer;
+	RECT m_fullscreenRect;
 };

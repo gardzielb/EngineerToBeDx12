@@ -14,7 +14,7 @@ namespace DXMath = DirectX::SimpleMath;
 using Microsoft::WRL::ComPtr;
 
 Game::Game() noexcept(false)
-	: m_imguiLayer(true, true, ImVec4(0.45f, 0.55f, 0.60f, 1.00f))
+	: m_fullscreenRect {}
 {
 	m_deviceResources = std::make_unique<DX::DeviceResources>();
 	m_deviceResources->RegisterDeviceNotify(this);
@@ -39,11 +39,6 @@ void Game::Initialize(HWND window, int width, int height)
 	m_deviceResources->CreateWindowSizeDependentResources();
 	CreateWindowSizeDependentResources();
 
-	auto device = m_deviceResources->GetD3DDevice();
-	m_imguiLayer.OnDeviceCreated(
-		window, device, m_deviceResources->GetBackBufferCount(), m_deviceResources->GetBackBufferFormat()
-	);
-
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
 	/*
@@ -67,7 +62,7 @@ void Game::Tick()
 }
 
 // Updates the world.
-void Game::Update(DX::StepTimer const & timer)
+void Game::Update(DX::StepTimer const& timer)
 {
 	PIXBeginEvent(PIX_COLOR_DEFAULT, L"Update");
 
@@ -75,25 +70,11 @@ void Game::Update(DX::StepTimer const & timer)
 
 	// TODO: Add your game logic here.
 
-	auto time = static_cast<float>(m_timer.GetTotalSeconds());
+	auto totalTime = static_cast<float>(timer.GetTotalSeconds());
 
-	float yaw = time * 0.4f;
-	float pitch = time * 0.7f;
-	float roll = time * 1.1f;
-
-	// TODO: seems to be an interesting fucking magic
-	auto quaternion = DXMath::Quaternion::CreateFromYawPitchRoll(pitch, yaw, roll);
-	auto light = XMVector3Rotate(g_XMOne, quaternion);
-	m_shapeEffect->SetLightDirection(0, light);
-
-	// m_triangleEffect->SetLightDirection(0, light);
-
-	m_gridModelMatrix = DXMath::Matrix::CreateRotationY(cosf(time));
-
-	m_shapeModelMatrix = DXMath::Matrix::CreateRotationY(-cosf(time));
-
-	// m_cupModelMatrix = DXMath::Matrix::CreateRotationZ(cosf(time) * 2.f);
-	m_cupModelMatrix = DXMath::Matrix::CreateTranslation(-1.f, 0.f, 0.f);
+	m_world = DXMath::Matrix::CreateRotationZ(totalTime / 2.f)
+		* DXMath::Matrix::CreateRotationY(totalTime)
+		* DXMath::Matrix::CreateRotationX(totalTime * 2.f);
 
 	PIXEndEvent();
 }
@@ -118,72 +99,20 @@ void Game::Render()
 
 	// TODO: Add your rendering code here.
 
-	// RENDER 3D
-	{
-		ID3D12DescriptorHeap * heaps[] = {m_resourceDescHeap->Heap(), m_states->Heap()};
-		commandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
+	ID3D12DescriptorHeap* heaps[] = {m_resourceDescriptors->Heap(), m_states->Heap()};
+	commandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
 
-		m_shapeEffect->SetWorld(m_shapeModelMatrix);
-		m_shapeEffect->Apply(commandList);
-		m_shape->Draw(commandList);
-	}
+	m_spriteBatch->Begin(commandList);
+	m_spriteBatch->Draw(
+		m_resourceDescriptors->GetGpuHandle(Descriptors::Background),
+		GetTextureSize(m_background.Get()),
+		m_fullscreenRect
+	);
+	m_spriteBatch->End();
 
-	// RENDER TRIANGLE
-	// {
-	// ID3D12DescriptorHeap * heaps[] = {m_resourceDescHeap->Heap(), m_states->Heap()};
-	// commandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
-
-	// m_triangleEffect->Apply(commandList);
-	// m_triangleBatch->Begin(commandList);
-
-	// TriangleVertex v1(DXMath::Vector3(0.0f, 0.5f, 0.5f), -DXMath::Vector3::UnitZ, DXMath::Vector2(0.5f, 0));
-	// TriangleVertex v2(DXMath::Vector3(0.5f, -0.5f, 0.5f), -DXMath::Vector3::UnitZ, DXMath::Vector2(1, 1));
-	// TriangleVertex v3(DXMath::Vector3(-0.5f, -0.5f, 0.5f), -DXMath::Vector3::UnitZ, DXMath::Vector2(0, 1));
-
-	// m_triangleBatch->DrawTriangle(v1, v2, v3);
-	// m_triangleBatch->End();
-	// }
-
-	// RENDER CUP MODEL
-	{
-		ID3D12DescriptorHeap * heaps[] = {m_cupModelResources->Heap(), m_states->Heap()};
-		commandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
-
-		Model::UpdateEffectMatrices(m_cupModelEffects, m_cupModelMatrix, m_viewMatrix, m_projMatrix);
-		m_cupModel->Draw(commandList, m_cupModelEffects.cbegin());
-	}
-
-	// RENDER GRID
-	{
-		m_gridEffect->SetWorld(m_gridModelMatrix);
-		m_gridEffect->Apply(commandList);
-		m_gridBatch->Begin(commandList);
-
-		DXMath::Vector3 xAxis(2.f, 0.f, 0.f);
-		DXMath::Vector3 yAxis(0.f, 0.f, 2.f);
-		DXMath::Vector3 origin = DXMath::Vector3::Zero;
-
-		constexpr size_t divisions = 20;
-
-		for (size_t i = 0; i < divisions; i++)
-		{
-			float gridPercent = (float)i / (float)divisions * 2.f - 1.f;;
-			auto cellX = xAxis * gridPercent + origin;
-			auto cellY = yAxis * gridPercent + origin;
-
-			GridVertex v1(cellX - yAxis, Colors::White);
-			GridVertex v2(cellX + yAxis, Colors::White);
-			m_gridBatch->DrawLine(v1, v2);
-
-			GridVertex v3(cellY - xAxis, Colors::White);
-			GridVertex v4(cellY + xAxis, Colors::White);
-			m_gridBatch->DrawLine(v3, v4);
-		}
-
-		m_gridBatch->End();
-	}
-
-	m_imguiLayer.OnRender(commandList);
+	m_effect->SetMatrices(m_world, m_view, m_projection);
+	m_effect->Apply(commandList);
+	m_shape->Draw(commandList);
 
 	PIXEndEvent(commandList);
 
@@ -191,8 +120,6 @@ void Game::Render()
 	PIXBeginEvent(m_deviceResources->GetCommandQueue(), PIX_COLOR_DEFAULT, L"Present");
 	m_deviceResources->Present();
 
-	m_imguiLayer.OnPresent(commandList);
-	
 	m_graphicsMemory->Commit(m_deviceResources->GetCommandQueue());
 	PIXEndEvent(m_deviceResources->GetCommandQueue());
 }
@@ -208,8 +135,10 @@ void Game::Clear()
 	auto dsvDescriptor = m_deviceResources->GetDepthStencilView();
 
 	commandList->OMSetRenderTargets(1, &rtvDescriptor, FALSE, &dsvDescriptor);
-	commandList->ClearRenderTargetView(rtvDescriptor, Colors::CornflowerBlue, 0, nullptr);
-	commandList->ClearDepthStencilView(dsvDescriptor, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	commandList->OMSetRenderTargets(1, &rtvDescriptor, FALSE, &dsvDescriptor);
+	commandList->ClearDepthStencilView(
+		dsvDescriptor, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr
+	);
 
 	// Set the viewport and scissor rect.
 	auto viewport = m_deviceResources->GetScreenViewport();
@@ -265,7 +194,7 @@ void Game::OnWindowSizeChanged(int width, int height)
 }
 
 // Properties
-void Game::GetDefaultSize(int & width, int & height) const noexcept
+void Game::GetDefaultSize(int& width, int& height) const noexcept
 {
 	// TODO: Change to desired default window size (note minimum size is 320x200).
 	width = 800;
@@ -278,98 +207,67 @@ void Game::GetDefaultSize(int & width, int & height) const noexcept
 void Game::CreateDeviceDependentResources()
 {
 	auto device = m_deviceResources->GetD3DDevice();
-
 	m_graphicsMemory = std::make_unique<GraphicsMemory>(device);
 
-	RenderTargetState renderTargetState(
-		m_deviceResources->GetBackBufferFormat(), m_deviceResources->GetDepthBufferFormat()
-	);
-
-	// GRID
-
-	m_gridBatch = std::make_unique<PrimitiveBatch<GridVertex>>(device);
-
-	CD3DX12_RASTERIZER_DESC rasterizerDesc(
-		D3D12_FILL_MODE_SOLID, D3D12_CULL_MODE_NONE, FALSE,
-		D3D12_DEFAULT_DEPTH_BIAS, D3D12_DEFAULT_DEPTH_BIAS_CLAMP,
-		D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS, TRUE, FALSE, TRUE,
-		0, D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF
-	);
-
-	EffectPipelineStateDescription gridPipelineDesc(
-		&GridVertex::InputLayout, CommonStates::Opaque, CommonStates::DepthDefault,
-		rasterizerDesc, renderTargetState, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE
-	);
-
-	m_gridEffect = std::make_unique<BasicEffect>(device, EffectFlags::VertexColor, gridPipelineDesc);
-	m_gridModelMatrix = DXMath::Matrix::Identity;
-
-	// 3D SHAPE
-
-	LoadTexture(device);
-
-	EffectPipelineStateDescription shapePipelineDesc(
-		&GeometricPrimitive::VertexType::InputLayout, CommonStates::Opaque,
-		CommonStates::DepthDefault, CommonStates::CullNone, renderTargetState
-	);
-
-	m_shapeEffect = std::make_unique<NormalMapEffect>(device, EffectFlags::None, shapePipelineDesc);
-	m_shapeEffect->EnableDefaultLighting();
-
 	m_states = std::make_unique<CommonStates>(device);
+	m_shape = GeometricPrimitive::CreateTorus();
 
-	auto textureGpuHandle = m_resourceDescHeap->GetGpuHandle(ResourceDescriptors::Rocks);
-	m_shapeEffect->SetTexture(textureGpuHandle, m_states->AnisotropicWrap());
-
-	auto normalMapGpuHandle = m_resourceDescHeap->GetGpuHandle(ResourceDescriptors::NormalMap);
-	m_shapeEffect->SetNormalTexture(normalMapGpuHandle);
-
-	m_shape = GeometricPrimitive::CreateTeapot();
-	m_shapeModelMatrix = DXMath::Matrix::Identity;
-
-	// CUP MODEL
-
-	m_cupModel = Model::CreateFromSDKMESH(device, L"cup.sdkmesh");
-	LoadModel(device);
-
-	EffectPipelineStateDescription cupPipelineDesc(
-		nullptr, CommonStates::Opaque, CommonStates::DepthDefault,
-		CommonStates::CullClockwise, renderTargetState
+	m_resourceDescriptors = std::make_unique<DescriptorHeap>(
+		device,
+		Descriptors::Count
 	);
 
-	EffectPipelineStateDescription cupAlphaPipelineDesc(
-		nullptr, CommonStates::NonPremultiplied, CommonStates::DepthDefault,
-		CommonStates::CullClockwise, renderTargetState
+	ResourceUploadBatch resourceUpload(device);
+
+	resourceUpload.Begin();
+
+	m_shape->LoadStaticBuffers(device, resourceUpload);
+
+	RenderTargetState sceneState(
+		m_deviceResources->GetBackBufferFormat(),
+		m_deviceResources->GetDepthBufferFormat()
 	);
 
-	m_cupModelEffects = m_cupModel->CreateEffects(*m_effectFactory, cupPipelineDesc, cupAlphaPipelineDesc);
-	m_cupModelMatrix = DXMath::Matrix::Identity;
+	{
+		EffectPipelineStateDescription pd(
+			&GeometricPrimitive::VertexType::InputLayout,
+			CommonStates::Opaque,
+			CommonStates::DepthDefault,
+			CommonStates::CullCounterClockwise,
+			sceneState
+		);
 
-	// TRIANGLE
+		m_effect = std::make_unique<BasicEffect>(device, EffectFlags::Lighting, pd);
+		m_effect->EnableDefaultLighting();
+	}
 
-	// LoadTexture(device);
+	{
+		SpriteBatchPipelineStateDescription pd(sceneState);
+		m_spriteBatch = std::make_unique<SpriteBatch>(device, resourceUpload, pd);
+	}
 
-	// m_triangleBatch = std::make_unique<PrimitiveBatch<TriangleVertex>>(device);
+	DX::ThrowIfFailed(
+		CreateWICTextureFromFile(
+			device, resourceUpload,
+			L"sunset.jpg",
+			m_background.ReleaseAndGetAddressOf()
+		)
+	);
 
-	// EffectPipelineStateDescription trianglePipelineDesc(
-	// &TriangleVertex::InputLayout, CommonStates::Opaque, CommonStates::DepthDefault,
-	// CommonStates::CullCounterClockwise, renderTargetState
-	// );
+	CreateShaderResourceView(
+		device, m_background.Get(),
+		m_resourceDescriptors->GetCpuHandle(Descriptors::Background)
+	);
 
-	// according to the tutorial this line is not here,
-	// but the tutorial is obviously wrong
-	// m_states = std::make_unique<CommonStates>(device);
+	auto uploadResourcesFinished = resourceUpload.End(
+		m_deviceResources->GetCommandQueue()
+	);
 
-	// m_triangleEffect = std::make_unique<NormalMapEffect>(device, EffectFlags::None, trianglePipelineDesc);
+	uploadResourcesFinished.wait();
 
-	// auto textureGpuHandle = m_resourceDescHeap->GetGpuHandle(ResourceDescriptors::Rocks);
-	// m_triangleEffect->SetTexture(textureGpuHandle, m_states->LinearClamp());
-
-	// auto normalMapGpuHandle = m_resourceDescHeap->GetGpuHandle(ResourceDescriptors::NormalMap);
-	// m_triangleEffect->SetNormalTexture(normalMapGpuHandle);
-
-	// m_triangleEffect->EnableDefaultLighting();
-	// m_triangleEffect->SetLightDiffuseColor(0, Colors::Gray);
+	m_view = DXMath::Matrix::CreateLookAt(
+		DXMath::Vector3(0.f, 3.f, -3.f), DXMath::Vector3::Zero, DXMath::Vector3::UnitY
+	);
 
 	// Check Shader Model 6 support
 	D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {D3D_SHADER_MODEL_6_0};
@@ -390,66 +288,15 @@ void Game::CreateWindowSizeDependentResources()
 {
 	// TODO: Initialize windows-size dependent objects here.
 
-	auto windowSize = m_deviceResources->GetOutputSize();
+	auto size = m_deviceResources->GetOutputSize();
+	m_fullscreenRect = size;
 
-	m_viewMatrix = DXMath::Matrix::CreateLookAt(
-		DXMath::Vector3(2.f, 2.f, 2.f), DXMath::Vector3::Zero, DXMath::Vector3::UnitY
+	auto vp = m_deviceResources->GetScreenViewport();
+	m_spriteBatch->SetViewport(vp);
+
+	m_projection = DXMath::Matrix::CreatePerspectiveFieldOfView(
+		XM_PIDIV4, static_cast<float>(size.right) / static_cast<float>(size.bottom), 0.01f, 100.f
 	);
-
-	auto aspectRatio = static_cast<float>(windowSize.right) / static_cast<float>(windowSize.bottom);
-	m_projMatrix = DXMath::Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, aspectRatio, 0.1f, 10.f);
-
-	m_gridEffect->SetView(m_viewMatrix);
-	m_gridEffect->SetProjection(m_projMatrix);
-
-	m_shapeEffect->SetView(m_viewMatrix);
-	m_shapeEffect->SetProjection(m_projMatrix);
-}
-
-void Game::LoadTexture(ID3D12Device * device)
-{
-	m_resourceDescHeap = std::make_unique<DescriptorHeap>(device, ResourceDescriptors::Count);
-
-	ResourceUploadBatch resourceUpload(device);
-	resourceUpload.Begin();
-
-	DX::ThrowIfFailed(
-		CreateWICTextureFromFile(
-			device, resourceUpload, L"kiti.jpg", m_texture.ReleaseAndGetAddressOf()
-		)
-	);
-
-	CreateShaderResourceView(
-		device, m_texture.Get(), m_resourceDescHeap->GetCpuHandle(ResourceDescriptors::Rocks)
-	);
-
-	DX::ThrowIfFailed(
-		CreateDDSTextureFromFile(
-			device, resourceUpload, L"rocks_normalmap.dds", m_normalMap.ReleaseAndGetAddressOf()
-		)
-	);
-
-	CreateShaderResourceView(
-		device, m_normalMap.Get(), m_resourceDescHeap->GetCpuHandle(ResourceDescriptors::NormalMap)
-	);
-
-	auto commandQueue = m_deviceResources->GetCommandQueue();
-	auto uploadResourceTask = resourceUpload.End(commandQueue);
-	uploadResourceTask.wait();
-}
-
-void Game::LoadModel(ID3D12Device * device)
-{
-	ResourceUploadBatch resourceUpload(device);
-	resourceUpload.Begin();
-
-	m_cupModel->LoadStaticBuffers(device, resourceUpload);
-
-	m_cupModelResources = m_cupModel->LoadTextures(device, resourceUpload);
-	m_effectFactory = std::make_unique<EffectFactory>(m_cupModelResources->Heap(), m_states->Heap());
-
-	auto uploadFinished = resourceUpload.End(m_deviceResources->GetCommandQueue());
-	uploadFinished.wait();
 }
 
 void Game::OnDeviceLost()
@@ -457,26 +304,12 @@ void Game::OnDeviceLost()
 	// TODO: Add Direct3D resource cleanup here.
 	m_graphicsMemory.reset();
 
-	m_gridEffect.reset();
-	m_gridBatch.reset();
-
-	// m_triangleEffect.reset();
-	// m_triangleBatch.reset();
-
-	m_texture.Reset();
-	m_normalMap.Reset();
-	m_resourceDescHeap.reset();
-
-	m_shapeEffect.reset();
-	m_shape.reset();
-
 	m_states.reset();
-	m_effectFactory.reset();
-	m_cupModelResources.reset();
-	m_cupModel.reset();
-	m_cupModelEffects.clear();
-
-	m_imguiLayer.OnDeviceLost();
+	m_shape.reset();
+	m_effect.reset();
+	m_spriteBatch.reset();
+	m_background.Reset();
+	m_resourceDescriptors.reset();
 }
 
 void Game::OnDeviceRestored()

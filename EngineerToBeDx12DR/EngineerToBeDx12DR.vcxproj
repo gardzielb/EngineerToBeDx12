@@ -227,6 +227,7 @@
     <Image Include="kiti.jpg" />
     <Image Include="rocks.jpg" />
     <Image Include="rocks_normalmap.dds" />
+    <Image Include="sunset.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest" />
