@@ -6,6 +6,8 @@
 
 #include "DemoImguiLayer.h"
 #include "DeviceResources.h"
+#include "MousePickEffect.h"
+#include "RenderTexture.h"
 #include "StepTimer.h"
 
 
@@ -17,11 +19,11 @@ public:
 	Game() noexcept(false);
 	~Game();
 
-	Game(Game &&) = default;
-	Game & operator=(Game &&) = default;
+	Game(Game&&) = default;
+	Game& operator=(Game&&) = default;
 
-	Game(Game const &) = delete;
-	Game & operator=(Game const &) = delete;
+	Game(Game const&) = delete;
+	Game& operator=(Game const&) = delete;
 
 	// Initialization and management
 	void Initialize(HWND window, int width, int height);
@@ -42,19 +44,19 @@ public:
 	void OnWindowSizeChanged(int width, int height);
 
 	// Properties
-	void GetDefaultSize(int & width, int & height) const noexcept;
+	void GetDefaultSize(int& width, int& height) const noexcept;
 
 private:
-	void Update(DX::StepTimer const & timer);
+	void Update(DX::StepTimer const& timer);
 	void Render();
 
-	void Clear();
+	void Clear(bool offscreen);
 
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 
 	void LoadTexture(ID3D12Device* device);
-	void LoadModel(ID3D12Device * device);
+	void LoadModel(ID3D12Device* device);
 
 	// Device resources.
 	std::unique_ptr<DX::DeviceResources> m_deviceResources;
@@ -62,45 +64,24 @@ private:
 	// Rendering loop timer.
 	DX::StepTimer m_timer;
 
-	// DX TK
 	std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;
 
-	// using TriangleVertex = DirectX::VertexPositionNormalTexture;
+	std::unique_ptr<MousePickEffect> m_mousePickEffect;
 
-	// std::unique_ptr<DirectX::NormalMapEffect> m_triangleEffect;
-	// std::unique_ptr<DirectX::PrimitiveBatch<TriangleVertex>> m_triangleBatch;
+	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
+	std::unique_ptr<DirectX::BasicEffect> m_effect;
 
-	std::unique_ptr<DirectX::CommonStates> m_states;
+	DirectX::SharedGraphicsResource m_vertexBuffer;
+	DirectX::SharedGraphicsResource m_indexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
-	std::unique_ptr<DirectX::DescriptorHeap> m_resourceDescHeap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_texture;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_normalMap;
+	std::unique_ptr<DirectX::DescriptorHeap> m_renderDescriptors;
+	std::unique_ptr<DX::RenderTexture> m_offscreenTexture;
 
-	enum ResourceDescriptors
+	enum RTDescriptors
 	{
-		Rocks,
-		NormalMap,
-		Count
+		OffscreenRT,
+		RTCount
 	};
-
-	using GridVertex = DirectX::VertexPositionColor;
-	
-	std::unique_ptr<DirectX::BasicEffect> m_gridEffect;
-	std::unique_ptr<DirectX::PrimitiveBatch<GridVertex>> m_gridBatch;
-	DirectX::SimpleMath::Matrix m_gridModelMatrix;
-
-	DirectX::SimpleMath::Matrix m_shapeModelMatrix;
-	std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
-	std::unique_ptr<DirectX::NormalMapEffect> m_shapeEffect;
-
-	DirectX::SimpleMath::Matrix m_cupModelMatrix;
-	std::unique_ptr<DirectX::EffectFactory> m_effectFactory;
-	std::unique_ptr<DirectX::Model> m_cupModel;
-	std::unique_ptr<DirectX::EffectTextureFactory> m_cupModelResources;
-	std::vector<std::shared_ptr<DirectX::IEffect>> m_cupModelEffects;
-
-	DirectX::SimpleMath::Matrix m_viewMatrix;
-	DirectX::SimpleMath::Matrix m_projMatrix;
-
-	DemoImguiLayer m_imguiLayer;
 };

@@ -1,0 +1,6 @@
+#define MousePickRS \
+"RootFlags ( ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |" \
+"            DENY_DOMAIN_SHADER_ROOT_ACCESS |" \
+"            DENY_GEOMETRY_SHADER_ROOT_ACCESS |" \
+"            DENY_HULL_SHADER_ROOT_ACCESS )," \
+"CBV(b0)"
