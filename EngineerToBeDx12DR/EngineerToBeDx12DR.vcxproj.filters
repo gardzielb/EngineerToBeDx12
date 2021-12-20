@@ -23,6 +23,8 @@
     </ClInclude>
     <ClInclude Include="ImguiLayerBase.h" />
     <ClInclude Include="DemoImguiLayer.h" />
+    <ClInclude Include="MousePickEffect.h" />
+    <ClInclude Include="MeshVertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -33,6 +35,8 @@
     </ClCompile>
     <ClCompile Include="ImguiLayerBase.cpp" />
     <ClCompile Include="DemoImguiLayer.cpp" />
+    <ClCompile Include="MousePickEffect.cpp" />
+    <ClCompile Include="MeshVertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -59,5 +63,10 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="cup.sdkmesh" />
+    <None Include="MousePickRS.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="MousePickPixelShader.hlsl" />
+    <FxCompile Include="MousePickVertexShader.hlsl" />
   </ItemGroup>
 </Project>

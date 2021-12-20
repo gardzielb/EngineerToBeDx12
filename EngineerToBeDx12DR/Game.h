@@ -7,6 +7,7 @@
 #include "DemoImguiLayer.h"
 #include "DeviceResources.h"
 #include "StepTimer.h"
+#include "MousePickEffect.h"
 
 
 // A basic game implementation that creates a D3D12 device and
@@ -65,42 +66,15 @@ private:
 	// DX TK
 	std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;
 
-	// using TriangleVertex = DirectX::VertexPositionNormalTexture;
+	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
+	std::unique_ptr<MousePickEffect> m_customEffect;
 
-	// std::unique_ptr<DirectX::NormalMapEffect> m_triangleEffect;
-	// std::unique_ptr<DirectX::PrimitiveBatch<TriangleVertex>> m_triangleBatch;
+	DirectX::SharedGraphicsResource m_vertexBuffer;
+	DirectX::SharedGraphicsResource m_indexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
-	std::unique_ptr<DirectX::CommonStates> m_states;
-
-	std::unique_ptr<DirectX::DescriptorHeap> m_resourceDescHeap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_texture;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_normalMap;
-
-	enum ResourceDescriptors
-	{
-		Rocks,
-		NormalMap,
-		Count
-	};
-
-	using GridVertex = DirectX::VertexPositionColor;
-	
-	std::unique_ptr<DirectX::BasicEffect> m_gridEffect;
-	std::unique_ptr<DirectX::PrimitiveBatch<GridVertex>> m_gridBatch;
-	DirectX::SimpleMath::Matrix m_gridModelMatrix;
-
-	DirectX::SimpleMath::Matrix m_shapeModelMatrix;
-	std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
-	std::unique_ptr<DirectX::NormalMapEffect> m_shapeEffect;
-
-	DirectX::SimpleMath::Matrix m_cupModelMatrix;
-	std::unique_ptr<DirectX::EffectFactory> m_effectFactory;
-	std::unique_ptr<DirectX::Model> m_cupModel;
-	std::unique_ptr<DirectX::EffectTextureFactory> m_cupModelResources;
-	std::vector<std::shared_ptr<DirectX::IEffect>> m_cupModelEffects;
-
+	DirectX::SimpleMath::Matrix m_modelMatrix;
 	DirectX::SimpleMath::Matrix m_viewMatrix;
 	DirectX::SimpleMath::Matrix m_projMatrix;
-
-	DemoImguiLayer m_imguiLayer;
 };
