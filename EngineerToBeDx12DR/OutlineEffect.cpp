@@ -1,11 +1,10 @@
 ﻿#include "pch.h"
-#include "MousePickEffect.h"
+#include "OutlineEffect.h"
 
 #include "MeshVertex.h"
 
-#include "MousePickPixelShader.h"
-#include "MousePickVertexShader.h"
-
+#include "OutlineVertexShader.h"
+#include "OutlinePixelShader.h"
 
 namespace dx = DirectX;
 
@@ -16,11 +15,11 @@ struct __declspec(align(16)) MousePickConstants
 
 static_assert((sizeof(MousePickConstants) % 16) == 0, "CB size alignment");
 
-MousePickEffect::MousePickEffect(ID3D12Device* device, dx::RenderTargetState rtState)
+OutlineEffect::OutlineEffect(ID3D12Device* device, dx::RenderTargetState rtState)
 {
 	DX::ThrowIfFailed(
 		device->CreateRootSignature(
-			0, g_MousePickVS, sizeof(g_MousePickVS),
+			0, g_OutlineVS, sizeof(g_OutlineVS),
 			IID_PPV_ARGS(m_rootSignature.ReleaseAndGetAddressOf())
 		)
 	);
@@ -48,18 +47,18 @@ MousePickEffect::MousePickEffect(ID3D12Device* device, dx::RenderTargetState rtS
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc;
 	depthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	depthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
 	depthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_REPLACE;
-	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthEnable = false;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	depthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_REPLACE;
 	depthStencilDesc.StencilEnable = true;
 	depthStencilDesc.StencilReadMask = 0xff;
-	depthStencilDesc.StencilWriteMask = 0xff;
+	depthStencilDesc.StencilWriteMask = 0x00;
 
 	psoDesc.DepthStencilState = depthStencilDesc;
 
@@ -72,8 +71,8 @@ MousePickEffect::MousePickEffect(ID3D12Device* device, dx::RenderTargetState rtS
 	psoDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-	psoDesc.VS = {g_MousePickVS, sizeof(g_MousePickVS)};
-	psoDesc.PS = {g_MousePickPS, sizeof(g_MousePickPS)};
+	psoDesc.VS = { g_OutlineVS, sizeof(g_OutlineVS) };
+	psoDesc.PS = { g_OutlinePS, sizeof(g_OutlinePS) };
 	psoDesc.pRootSignature = m_rootSignature.Get();
 
 	DX::ThrowIfFailed(
@@ -81,7 +80,7 @@ MousePickEffect::MousePickEffect(ID3D12Device* device, dx::RenderTargetState rtS
 	);
 }
 
-void MousePickEffect::Apply(ID3D12GraphicsCommandList* commandList)
+void OutlineEffect::Apply(ID3D12GraphicsCommandList* commandList)
 {
 	auto transformMatrix = m_modelMatrix * m_viewMatrix * m_projectionMatrix;
 	memcpy(m_constantBuffer.Memory(), &transformMatrix, m_constantBuffer.Size());

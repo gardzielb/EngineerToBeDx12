@@ -8,6 +8,7 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "MousePickEffect.h"
+#include "OutlineEffect.h"
 
 
 // A basic game implementation that creates a D3D12 device and
@@ -68,6 +69,7 @@ private:
 
 	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
 	std::unique_ptr<MousePickEffect> m_customEffect;
+	std::unique_ptr<OutlineEffect> m_outlineEffect;
 
 	DirectX::SharedGraphicsResource m_vertexBuffer;
 	DirectX::SharedGraphicsResource m_indexBuffer;

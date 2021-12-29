@@ -72,8 +72,8 @@ void Game::Update(DX::StepTimer const& timer)
 
 	// TODO: Add your game logic here.
 
-	auto time = static_cast<float>(m_timer.GetTotalSeconds());
-	m_modelMatrix = DXMath::Matrix::CreateRotationY(cosf(time));
+	// auto time = static_cast<float>(m_timer.GetTotalSeconds());
+	// m_modelMatrix = DXMath::Matrix::CreateRotationY(DirectX::XM_PI / 4);
 
 	PIXEndEvent();
 }
@@ -96,17 +96,26 @@ void Game::Render()
 	auto commandList = m_deviceResources->GetCommandList();
 	PIXBeginEvent(commandList, PIX_COLOR_DEFAULT, L"Render");
 
+	commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	commandList->IASetIndexBuffer(&m_indexBufferView);
+	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	auto& currentEffect = m_customEffect;
+	// auto& currentEffect = m_basicEffect;
 
 	currentEffect->SetWorld(m_modelMatrix);
 	currentEffect->SetView(m_viewMatrix);
 	currentEffect->SetProjection(m_projMatrix);
 	currentEffect->Apply(commandList);
 
-	commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-	commandList->IASetIndexBuffer(&m_indexBufferView);
-	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+	m_outlineEffect->SetWorld(DXMath::Matrix::CreateScale(1.1f, 1.1f, 1.0f));
+	m_outlineEffect->SetView(m_viewMatrix);
+	m_outlineEffect->SetProjection(m_projMatrix);
+	m_outlineEffect->Apply(commandList);
+
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 	PIXEndEvent(commandList);
 
@@ -130,7 +139,10 @@ void Game::Clear()
 
 	commandList->OMSetRenderTargets(1, &rtvDescriptor, FALSE, &dsvDescriptor);
 	commandList->ClearRenderTargetView(rtvDescriptor, Colors::CornflowerBlue, 0, nullptr);
-	commandList->ClearDepthStencilView(dsvDescriptor, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	commandList->ClearDepthStencilView(
+		dsvDescriptor, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr
+	);
+	commandList->OMSetStencilRef(1);
 
 	// Set the viewport and scissor rect.
 	auto viewport = m_deviceResources->GetScreenViewport();
@@ -207,6 +219,7 @@ void Game::CreateDeviceDependentResources()
 	);
 
 	m_customEffect = std::make_unique<MousePickEffect>(device, renderTargetState);
+	m_outlineEffect = std::make_unique<OutlineEffect>(device, renderTargetState);
 
 	CD3DX12_RASTERIZER_DESC rasterizerDesc(
 		D3D12_FILL_MODE_SOLID, D3D12_CULL_MODE_NONE, FALSE,
@@ -219,16 +232,19 @@ void Game::CreateDeviceDependentResources()
 		&MeshVertex::InputLayout, CommonStates::Opaque, CommonStates::DepthDefault, rasterizerDesc, renderTargetState
 	);
 
-	// m_basicEffect = std::make_unique<BasicEffect>(device, EffectFlags::None, pipelineDesc);
-	// m_basicEffect->SetDiffuseColor(Colors::White);
+	m_basicEffect = std::make_unique<BasicEffect>(device, EffectFlags::None, pipelineDesc);
+	m_basicEffect->SetDiffuseColor(Colors::Red);
 
 	std::vector<MeshVertex> vertices {
-		MeshVertex(-0.5f, 0.5f, 0.5f, 1),
-		MeshVertex(0.5f, 0.5f, 0.5f, 1),
-		MeshVertex(0.0f, -0.5f, 0.5f, 1)
+		MeshVertex(-0.5f, 0.5f, 0.5f, 0.3f),
+		MeshVertex(0.5f, 0.5f, 0.5f, 0.3f),
+		MeshVertex(0.0f, -0.5f, 0.5f, 0.3f),
+		MeshVertex(-0.2f, 0.3f, 0.7f, 0.7f),
+		MeshVertex(0.6f, 0.3f, 0.7f, 0.7f),
+		MeshVertex(0.2f, -0.4f, 0.7f, 0.7f)
 	};
 
-	std::vector<uint16_t> indices {0, 1, 2};
+	std::vector<uint16_t> indices {0, 1, 2, 3, 4, 5};
 
 	// Vertex data
 	unsigned int vertSizeBytes = vertices.size() * sizeof(MeshVertex);
@@ -274,7 +290,7 @@ void Game::CreateWindowSizeDependentResources()
 	auto windowSize = m_deviceResources->GetOutputSize();
 
 	m_viewMatrix = DXMath::Matrix::CreateLookAt(
-		DXMath::Vector3(2.f, 2.f, 2.f), DXMath::Vector3::Zero, DXMath::Vector3::UnitY
+		DXMath::Vector3(0.f, 0.f, 3.f), DXMath::Vector3::Zero, DXMath::Vector3::UnitY
 	);
 
 	auto aspectRatio = static_cast<float>(windowSize.right) / static_cast<float>(windowSize.bottom);

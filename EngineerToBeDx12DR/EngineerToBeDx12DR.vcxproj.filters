@@ -25,6 +25,7 @@
     <ClInclude Include="DemoImguiLayer.h" />
     <ClInclude Include="MousePickEffect.h" />
     <ClInclude Include="MeshVertex.h" />
+    <ClInclude Include="OutlineEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="DemoImguiLayer.cpp" />
     <ClCompile Include="MousePickEffect.cpp" />
     <ClCompile Include="MeshVertex.cpp" />
+    <ClCompile Include="OutlineEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -68,5 +70,7 @@
   <ItemGroup>
     <FxCompile Include="MousePickPixelShader.hlsl" />
     <FxCompile Include="MousePickVertexShader.hlsl" />
+    <FxCompile Include="OutlinePixelShader.hlsl" />
+    <FxCompile Include="OutlineVertexShader.hlsl" />
   </ItemGroup>
 </Project>
